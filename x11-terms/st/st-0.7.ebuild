@@ -27,6 +27,7 @@ DEPEND="
 	x11-proto/xproto
 "
 src_unpack() {
+	unpack ${A}
     mv ${WORKDIR}/st-master ${WORKDIR}/st-0.7
 }
 
