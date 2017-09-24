@@ -43,7 +43,7 @@ src_prepare() {
 }
 
 src_install() {
-	emake DESTDIR="${D}" PREFIX="${EPREFIX}"/usr install
+	emake DESTDIR="${WORKDIR}/st-master" PREFIX="${EPREFIX}"/usr install
 
 	dodoc TODO
 
