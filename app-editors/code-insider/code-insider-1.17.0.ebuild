@@ -45,11 +45,11 @@ src_install(){
 	pax-mark m code
 	insinto "/opt/${PN}"
 	doins -r *
-	dosym "/opt/${PN}/bin/code" "/usr/bin/${PN}"
+	dosym "/opt/${PN}/bin/code-insiders" "/usr/bin/${PN}"
 	make_desktop_entry "${PN}" "Visual Studio Code" "${PN}" "Development;IDE"
 	doicon ${FILESDIR}/${PN}.png
-	fperms +x "/opt/${PN}/code"
-	fperms +x "/opt/${PN}/bin/code"
+	fperms +x "/opt/${PN}/code-insiders"
+	fperms +x "/opt/${PN}/bin/code-insiders"
 	fperms +x "/opt/${PN}/libnode.so"
 	fperms +x "/opt/${PN}/resources/app/node_modules/vscode-ripgrep/bin/rg"
 	insinto "/usr/share/licenses/${PN}"
