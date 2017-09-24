@@ -26,6 +26,9 @@ DEPEND="
 	x11-proto/xextproto
 	x11-proto/xproto
 "
+src_unpack() {
+    mv ${WORKDIR}/st-master ${WORKDIR}/st-0.7
+}
 
 src_prepare() {
 	eapply_user
@@ -43,7 +46,7 @@ src_prepare() {
 }
 
 src_install() {
-	emake DESTDIR="${WORKDIR}/st-master" PREFIX="${EPREFIX}"/usr install
+	emake DESTDIR="${D}" PREFIX="${EPREFIX}"/usr install
 
 	dodoc TODO
 
