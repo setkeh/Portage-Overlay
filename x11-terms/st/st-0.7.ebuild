@@ -47,7 +47,7 @@ src_prepare() {
 }
 
 src_install() {
-	emake DESTDIR="${D}" PREFIX="${EPREFIX}"/usrs install
+	emake DESTDIR="${D}" PREFIX="${EPREFIX}"/usr install
 
 	dodoc TODO
 
