@@ -31,7 +31,7 @@ DEPEND="
 
 RDEPEND="
 	${DEPEND}
-	>=net-print/cups-2.0.0
+	net-print/cups
 	x11-libs/libnotify
 	x11-libs/libXScrnSaver
 	app-crypt/libsecret[crypt]
