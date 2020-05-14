@@ -25,6 +25,7 @@ DEPEND="
 
 src_prepare() {
   default
+  restore_config config.h
 }
 
 src_install() {
