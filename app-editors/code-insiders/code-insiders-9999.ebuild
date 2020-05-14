@@ -20,8 +20,8 @@ KEYWORDS="~x86 ~amd64"
 IUSE=""
 
 DEPEND="
-	>=media-libs/libpng
-	>=x11-libs/gtk+
+	media-libs/libpng
+	x11-libs/gtk+
 	x11-libs/cairo
 	gnome-base/gconf
 	x11-libs/libXtst
