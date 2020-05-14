@@ -17,9 +17,15 @@ KEYWORDS="~amd64 ~x86"
 IUSE=""
 
 DEPEND="
-	dev-lang/go"
-RDEPEND="
-	app-crypt/gnupg"
+	dev-lang/go
+	sys-apps/yarn
+	net-libs/nodejs[npm]"
+RDEPEND="${DEPEND}
+	app-crypt/kbfs
+	app-crypt/gnupg
+	sys-fs/fuse
+	gnome-base/gconf
+	x11-libs/libXScrnSaver"
 
 S="${WORKDIR}/src/github.com/keybase/client"
 
@@ -29,16 +35,52 @@ src_unpack() {
 	mv "client-${MY_PV}" "${S}" || die
 }
 
+src_prepare() {
+	eapply_user
+	local inhibit_arch
+	use amd64 && inhibit_arch=i386
+	use x86 && inhibit_arch=amd64
+	if [ -n "$inhibit_arch" ]; then
+		sed -i '/debian_arch='$inhibit_arch'/,/^$/ s/^build_one/#\0/' client/packaging/linux/build_binaries.sh
+	fi
+}
+
 src_compile() {
-	GOPATH="${WORKDIR}:${S}/go/vendor" \
-		go build -v -x \
-		-tags production \
-		-o "${T}/keybase" \
-		github.com/keybase/client/go/keybase || die
+	client/packaging/linux/build_binaries.sh prerelease build_dir
 }
 
 src_install() {
-	dobin "${T}/keybase"
+	use amd64 && cd build_dir/binaries/amd64
+	use x86 && cd build_dir/binaries/i386
+
+	exeinto /opt/keybase
+	doexe opt/keybase/Keybase
+	doexe opt/keybase/libffmpeg.so
+	doexe opt/keybase/libnode.so
+	doexe opt/keybase/post_install.sh
+	rm -f opt/keybase/{Keybase,lib*.so,post_install.sh}
+
+	insinto /opt
+	doins -r opt/keybase
+
+	exeinto /usr/bin
+	doexe usr/bin/kbfsfuse
+	doexe usr/bin/kbnm
+	doexe usr/bin/keybase
+	doexe usr/bin/run_keybase
+
+	for d in etc/chromium etc/opt/chrome; do
+		insinto /$d/native-messaging-hosts
+		doins $d/native-messaging-hosts/io.keybase.kbnm.json
+	done
+
+	domenu usr/share/applications/keybase.desktop
+
+	cd usr/share/icons/hicolor
+	local size
+	for size in *; do
+		doicon -s $size $size/apps/keybase.png
+	done
 }
 
 pkg_postinst() {
