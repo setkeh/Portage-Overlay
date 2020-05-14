@@ -3,7 +3,7 @@
 
 EAPI=7
 
-inherit eutils pax-utils
+inherit eutils pax-utils desktop
 
 DESCRIPTION="Multiplatform Visual Studio Code from Microsoft"
 HOMEPAGE="https://code.visualstudio.com"
@@ -20,6 +20,8 @@ KEYWORDS="~x86 ~amd64"
 IUSE=""
 
 DEPEND="
+	sys-apps/yarn
+	net-libs/nodejs[npm]
 	media-libs/libpng
 	x11-libs/gtk+
 	x11-libs/cairo
