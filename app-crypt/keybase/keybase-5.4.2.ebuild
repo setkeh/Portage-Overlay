@@ -1,89 +1,111 @@
-# Copyright 1999-2020 Gentoo Foundation
+# Copyright 1999-2020 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=6
+EAPI=7
 
-inherit eutils versionator
-
-MY_PV=$(replace_version_separator 3 '-')
+inherit golang-build systemd
 
 DESCRIPTION="Client for keybase.io"
 HOMEPAGE="https://keybase.io/"
-SRC_URI="https://github.com/keybase/client/archive/v${MY_PV}.tar.gz -> ${P}.tar.gz"
 
 LICENSE="BSD"
 SLOT="0"
+SRC_URI="https://github.com/keybase/client/archive/v${PV}.tar.gz -> ${P}.tar.gz"
 KEYWORDS="~amd64 ~x86"
-IUSE=""
 
-DEPEND="
-	dev-lang/go
-	sys-apps/yarn
-	net-libs/nodejs[npm]"
-RDEPEND="${DEPEND}
-	app-crypt/kbfs
-	app-crypt/gnupg
-	sys-fs/fuse
-	gnome-base/gconf
-	x11-libs/libXScrnSaver"
+IUSE="browser gui +kbfs"
 
-S="${WORKDIR}/src/github.com/keybase/client"
+RESTRICT="gui? ( network-sandbox )"
+
+BDEPEND="
+	gui? ( sys-apps/yarn )
+	kbfs? (
+		!app-crypt/kbfs
+		sys-fs/fuse
+	)
+"
+RDEPEND="app-crypt/gnupg"
 
 src_unpack() {
-	unpack "${P}.tar.gz"
-	mkdir -p "$(dirname "${S}")" || die
-	mv "client-${MY_PV}" "${S}" || die
-}
-
-src_prepare() {
-	eapply_user
-	local inhibit_arch
-	use amd64 && inhibit_arch=i386
-	use x86 && inhibit_arch=amd64
-	if [ -n "$inhibit_arch" ]; then
-		sed -i '/debian_arch='$inhibit_arch'/,/^$/ s/^build_one/#\0/' client/packaging/linux/build_binaries.sh
-	fi
+	default
+	ln -vs "client-${PV}" "${P}" || die
+	mkdir -vp "${S}/src/github.com/keybase" || die
+	ln -vs "${S}" "${S}/src/github.com/keybase/client" || die
 }
 
 src_compile() {
-	${S}/packaging/linux/build_binaries.sh prerelease build_dir
+	EGO_PN="github.com/keybase/client/go/keybase" \
+	EGO_BUILD_FLAGS="-tags production -o ${T}/keybase" \
+		golang-build_src_compile
+	use browser && (
+		EGO_PN="github.com/keybase/client/go/kbnm" \
+		EGO_BUILD_FLAGS="-tags production -o ${T}/kbnm" \
+			golang-build_src_compile
+	)
+	use kbfs && (
+		EGO_PN="github.com/keybase/client/go/kbfs/kbfsfuse" \
+		EGO_BUILD_FLAGS="-tags production -o ${T}/kbfsfuse" \
+			golang-build_src_compile
+		EGO_PN="github.com/keybase/client/go/kbfs/kbfsgit/git-remote-keybase" \
+		EGO_BUILD_FLAGS="-tags production -o ${T}/git-remote-keybase" \
+			golang-build_src_compile
+		EGO_PN="github.com/keybase/client/go/kbfs/redirector" \
+		EGO_BUILD_FLAGS="-tags production -o ${T}/keybase-redirector" \
+			golang-build_src_compile
+	)
+	use gui && (
+		local arch
+		use x86 && arch="ia32"
+		use amd64 && arch="x64"
+		cd shared
+		yarn
+		yarn run package -- --platform linux --arch "${arch}" --appVersion "${PV}"
+	)
+}
+
+src_test() {
+	EGO_PN="github.com/keybase/client/go/keybase" \
+		golang-build_src_test
 }
 
 src_install() {
-	use amd64 && cd build_dir/binaries/amd64
-	use x86 && cd build_dir/binaries/i386
+	dobin "${T}/keybase"
+	dobin "${S}/packaging/linux/run_keybase"
+	systemd_douserunit "${S}/packaging/linux/systemd/keybase.service"
+	dodir "/opt/keybase"
+	insinto "/opt/keybase"
+	doins "${S}/packaging/linux/crypto_squirrel.txt"
 
-	exeinto /opt/keybase
-	doexe opt/keybase/Keybase
-	doexe opt/keybase/libffmpeg.so
-	doexe opt/keybase/libnode.so
-	doexe opt/keybase/post_install.sh
-	rm -f opt/keybase/{Keybase,lib*.so,post_install.sh}
+	use gui && (
+		local arch
+		use x86 && arch="ia32"
+		use amd64 && arch="x64"
 
-	insinto /opt
-	doins -r opt/keybase
+		cd shared/desktop/release/linux-${arch}/Keybase-linux-${arch}
+		rm libGLESv2.so libEGL.so
+		insinto "/opt/keybase"
+		exeinto "/opt/keybase"
+		doins -r *
+		doexe chrome-sandbox Keybase
 
-	exeinto /usr/bin
-	doexe usr/bin/kbfsfuse
-	doexe usr/bin/kbnm
-	doexe usr/bin/keybase
-	doexe usr/bin/run_keybase
+		systemd_douserunit "${S}/packaging/linux/systemd/keybase.gui.service"
+	)
 
-	for d in etc/chromium etc/opt/chrome; do
-		insinto /$d/native-messaging-hosts
-		doins $d/native-messaging-hosts/io.keybase.kbnm.json
-	done
+	use browser && {
+		dobin "${T}/kbnm"
+		KBNM_INSTALL_ROOT=1 KBNM_INSTALL_OVERLAY="${D}" "${D}/usr/bin/kbnm" install
+	}
 
-	domenu usr/share/applications/keybase.desktop
-
-	cd usr/share/icons/hicolor
-	local size
-	for size in *; do
-		doicon -s $size $size/apps/keybase.png
-	done
+	use kbfs && {
+		dobin "${T}/kbfsfuse" "${T}/git-remote-keybase" "${T}/keybase-redirector"
+		systemd_douserunit "${S}/packaging/linux/systemd/kbfs.service"
+		systemd_douserunit "${S}/packaging/linux/systemd/keybase-redirector.service"
+	}
 }
 
 pkg_postinst() {
-	elog "Run the service: keybase service"
-	elog "Run the client:  keybase login"
+	elog "Start/Restart keybase: run_keybase"
+	elog "Run the service:       keybase service"
+	elog "Run the client:        keybase login"
+	ewarn "Note that the user keybasehelper is obsolete and can be removed"
 }
