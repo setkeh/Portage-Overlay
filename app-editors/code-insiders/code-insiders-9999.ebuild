@@ -53,7 +53,7 @@ src_install(){
 	fperms +x "/opt/${PN}/code-insiders"
 	fperms +x "/opt/${PN}/bin/code-insiders"
 	insinto "/usr/share/licenses/${PN}"
-	newins "resources/app/LICENSE.txt" "LICENSE"
+	doins "resources/app/LICENSE.txt" "LICENSE"
 }
 
 pkg_postinst(){
