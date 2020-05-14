@@ -92,8 +92,6 @@ src_install() {
 		doexe chrome-sandbox Keybase
 
 		systemd_douserunit "${S}/packaging/linux/systemd/keybase.gui.service"
-
-		chmod 4755 /opt/keybase/chrome-sandbox #Somtimes install breaks Gui and perms get jacked up
 	)
 
 	use browser && {
@@ -109,6 +107,7 @@ src_install() {
 }
 
 pkg_postinst() {
+	chmod 4755 /opt/keybase/chrome-sandbox #Somtimes install breaks Gui and perms get jacked up
 	elog "Start/Restart keybase: run_keybase"
 	elog "Run the service:       keybase service"
 	elog "Run the client:        keybase login"
