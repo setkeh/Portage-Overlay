@@ -25,7 +25,6 @@ DEPEND="
 
 src_prepare() {
   default
-  git-r3_fetch ${EGIT_REPO_URI}
 }
 
 src_install() {
