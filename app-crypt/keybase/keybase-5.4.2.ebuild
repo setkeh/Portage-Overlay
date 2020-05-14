@@ -17,7 +17,7 @@ KEYWORDS="~amd64 ~x86"
 IUSE=""
 
 DEPEND="
-	>=dev-lang/go"
+	dev-lang/go"
 RDEPEND="
 	app-crypt/gnupg"
 
