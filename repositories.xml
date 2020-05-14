@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE repositories SYSTEM "/dtd/repositories.dtd">
+<repositories xmlns="" version="1.0">
+  <repo quality="experimental" status="unofficial">
+    <name><![CDATA[setkeh]]></name>
+    <description lang="en"><![CDATA[Personal User Overlay]]></description>
+    <homepage>https://github.com/setkeh/Portage-Overlay</homepage>
+    <owner type="person">
+      <email>setkeh@gmail.com</email>
+      <name><![CDATA[James <SETKEH> Griffis]]></name>
+    </owner>
+    <source type="git">git://github.com:setkeh/Portage-Overlay.git</source>
+    <feed>https://github.com/setkeh/Portage-Overlay/commits/master.atom</feed>
+  </repo>
+</repositories>
