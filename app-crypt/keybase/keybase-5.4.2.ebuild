@@ -18,7 +18,10 @@ IUSE="browser gui +kbfs"
 RESTRICT="gui? ( network-sandbox )"
 
 BDEPEND="
-	gui? ( sys-apps/yarn )
+	gui? ( 
+		sys-apps/yarn
+		net-print/cups 
+	)
 	kbfs? (
 		!app-crypt/kbfs
 		sys-fs/fuse
