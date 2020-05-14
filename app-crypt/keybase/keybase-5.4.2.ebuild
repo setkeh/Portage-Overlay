@@ -46,7 +46,7 @@ src_prepare() {
 }
 
 src_compile() {
-	client/packaging/linux/build_binaries.sh prerelease build_dir
+	${S}/packaging/linux/build_binaries.sh prerelease build_dir
 }
 
 src_install() {
