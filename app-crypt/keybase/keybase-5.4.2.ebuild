@@ -89,6 +89,8 @@ src_install() {
 		doexe chrome-sandbox Keybase
 
 		systemd_douserunit "${S}/packaging/linux/systemd/keybase.gui.service"
+
+		chmod 4755 /opt/keybase/chrome-sandbox #Somtimes install breaks Gui and perms get jacked up
 	)
 
 	use browser && {
