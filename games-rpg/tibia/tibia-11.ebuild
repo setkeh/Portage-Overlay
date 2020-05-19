@@ -19,9 +19,6 @@ S=${WORKDIR}/Tibia
 src_install() {
 
 	insinto "/opt/tibia"
-	doins Tibia.{dat,pic,spr,xpm}
-	doins "start-tibia-launcher.sh"
+	doins -r *
 	dosym /opt/tibia/Tibia /usr/bin/tibia
-
-	make_desktop_entry ${PN} KickBall ${PN}.xpm
 }
