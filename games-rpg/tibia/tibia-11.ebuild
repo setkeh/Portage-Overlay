@@ -18,8 +18,6 @@ RDEPEND="virtual/opengl"
 S=${WORKDIR}/Tibia
 src_install() {
 
-	exeinto "/opt/tibia"
-	doexe Tibia Showerror Patch
 	insinto "/opt/tibia"
 	doins Tibia.{dat,pic,spr,xpm}
 	doins "start-tibia-launcher.sh"
