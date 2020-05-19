@@ -19,6 +19,8 @@ S=${WORKDIR}/Tibia
 src_install() {
 
 	insinto "/opt/tibia"
+	exeinto "/opt/tibia"
 	doins -r *
+	doexe Tibia
 	dosym /opt/tibia/Tibia /usr/bin/tibia
 }
