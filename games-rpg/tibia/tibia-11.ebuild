@@ -22,11 +22,8 @@ src_install() {
 	doexe Tibia Showerror Patch
 	insinto "/opt/tibia"
 	doins Tibia.{dat,pic,spr,xpm}
-	doexe "Patch"
-	doexe "Showerror"
-	doins "StartTibia.sh"
-	doins -r "libc6"
-	dosym /opt/tibia-client/Tibia /usr/bin/tibia
+	doins "start-tibia-launcher.sh"
+	dosym /opt/tibia/Tibia /usr/bin/tibia
 
 	make_desktop_entry ${PN} KickBall ${PN}.xpm
 }
