@@ -13,7 +13,11 @@ SLOT="0"
 KEYWORDS="~amd64"
 IUSE=""
 
-RDEPEND="virtual/opengl"
+RDEPEND="
+	virtual/opengl
+	dev-qt/qtcore
+	dev-qt/qtgui
+"
 
 S=${WORKDIR}/Tibia
 src_install() {
